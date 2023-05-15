@@ -50,3 +50,8 @@ function checkFiscalId(executionContext) {
         }
         }
 }
+
+function onSave(executionContext){
+
+    checkFiscalId(executionContext);
+}
