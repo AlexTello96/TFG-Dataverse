@@ -111,24 +111,6 @@ function OnChangePostalCode(executionContext) {
     //filterLookUpLocality(executionContext, obtener2DigitosCP(executionContext));    
 }
 
-function AddFilterCliente() {
-
-    let tipoCliente = CRMCommon.GetValue("oxi_clienttype");
-    let codigoPostal = CRMCommon.GetValue("oxi_postalcodeid");
-
-    if (tipoCliente != null && codigoPostal != null && CRMCommon.GetValue("oxi_postalcodeid")[0] != null) {
-
-        let viewGuid = "";
-        if (tipoCliente == 279320001) {
-            viewGuid = "790A32B7-329C-EB11-B1AC-000D3ADCC768";
-        }
-        else {
-            viewGuid = "9C1577AF-329C-EB11-B1AC-000D3ADCC768";
-        }
-        CRMCommon.SetDefaultView("oxi_accountid", viewGuid);
-    }
-}
-
 function setDireccionesFromCliente() {
 
     let postalCode = CRMCommon.getValueFromQuickViewForm("PatientAddress", "oxi_postalcodeid");
@@ -197,11 +179,11 @@ function SetDeliveryAddressEmpty() {
 function obtenerProvincia() {
     if (CRMCommon.GetValue("oxi_postalcodeid") != null) {
         var postalcodeId = CRMCommon.GetValue("oxi_postalcodeid")[0].id;
-        var postalcode = CRMCommon.GetValue("oxi_postalcodeid")[0].name.substring(0, 2); //primeros 2 dígitos - provincia
+        var postalcode = CRMCommon.GetValue("oxi_postalcodeid")[0].name.substring(0, 2); //first 2 digits - province
 
         var province = null;
         
-        //Consulta la entidad Provincia usando el servicio web
+        //Check province entity
         var req = new XMLHttpRequest();
         req.open("GET", Xrm.Page.context.getClientUrl() + "/api/data/v9.1/oxi_provinces?$filter=oxi_code eq '" + postalcode + "'", false);
         req.setRequestHeader("OData-MaxVersion", "4.0");
@@ -234,7 +216,7 @@ function obtener2DigitosCP() {
         var postalcode = CRMCommon.GetValue("oxi_postalcodeid")[0].name;
 
 
-        postalcode = postalcode.substring(0, 2) //primeros 2 dígitos - provincia
+        postalcode = postalcode.substring(0, 2) //first 2 digits - province
 
         return postalcode;
 
@@ -306,42 +288,11 @@ function customerTypeOnChange(executionContext) {
 
 }
 
-//filtro para parametro cliente
-function filterLookUpAccount(executionContext, customerType) {
-    var formContext = executionContext.getFormContext();
-
-    if (globFetchXml == null) {
-        //for adding the existing filters
-        formContext.getControl("oxi_clientparameterid").addPreSearch(Filterfunction);
-    }
-
-    else {
-        //for removing the existing filters
-        formContext.getControl("oxi_clientparameterid").removePreSearch(Filterfunction);
-        globFetchXml = null;
-    }
-
-}
-
-var Filterfunction = function () {
-
-    globFetchXml = "<filter type='and'><condition attribute='oxi_customertype' operator='eq' value='" + CRMCommon.GetValue("oxi_customertype") + "' /></filter>";
-    CRMCommon.AddCustomFilter("oxi_clientparameterid", globFetchXml);
-}
-
-//comprueba el campo de excepción de número de afiliación
-function numAfilCheckOnChange() {
-    var numAfiliacionCheck = CRMCommon.GetValue("oxi_exceptionaffiliatenumber");
-
-    checkAfilFieldsOnLoad(numAfiliacionCheck, null);
-    checkNumAfilStatus();
-}
-
 //comprueba el campo de número de afiliación
 function numAfilOnChange() {
     var numAfiliacion = CRMCommon.GetValue("oxi_affiliatenumber");
 
-    checkAfilFieldsOnLoad(false, numAfiliacion);
+    checkAfilFieldsOnLoad(numAfiliacion);
     checkNumAfilStatus();
 
 }
@@ -351,7 +302,7 @@ function checkNumAfilStatus() {
     var numAfilStatus = CRMCommon.GetValue("oxi_affiliatenumber");
 
     if (numAfilStatus == null) {
-        CRMCommon.SetNotification("Número de Afiliación no incluido", "WARNING", "NotifyTecnician");
+        CRMCommon.SetNotification("Affiliation number not included", "WARNING", "NotifyTecnician");
     }
 
     else {
