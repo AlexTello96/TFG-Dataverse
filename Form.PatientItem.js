@@ -62,6 +62,7 @@ function OnChangeCodigoPostal(executionContext) {
 function OnChangeDireccionesIguales(executionContext) {
 
     CRMCommon.FormContextGlobal = executionContext.getFormContext();
+   
     if (CRMCommon.GetValue("oxi_deliveryaddressequalbillingaddress")) {
 
         SetDeliveryAddress();

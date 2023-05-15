@@ -4,12 +4,43 @@ function onLoad(executionContext)
 
 }
 
-function postalCodeOnChange()
+function postalCodeOnChange(executionContext)
 {
-    if(CRMCommon.GetValue("oxi_postalcodeid")[0].id == null)
+    CRMCommon.FormContextGlobal = executionContext.getFormContext();
+    if(CRMCommon.GetValue("oxi_postalcodeid") == null)
     {
         CRMCommon.SetValue("oxi_locality", null);
     }
+
+    else{
+
+        var postalCode = CRMCommon.GetValue("oxi_postalcodeid")[0].id;
+
+        var fetchXML = "<fetch version='1.0' output-format='xml-platform' mapping='logical' distinct='false'>"+
+        "<entity name='oxi_locality'>"+
+         "<attribute name='oxi_name' />"+
+          "<attribute name='createdon' />"+
+           "<attribute name='oxi_provinceid' />"+
+           "<attribute name='oxi_postalcodeid' />"+
+           "<attribute name='oxi_localityid' />"+
+          "<order attribute='oxi_name' descending='false' />"+
+           "<filter type='and'>"+
+             "<condition attribute='oxi_postalcodeid' operator='eq' uitype='oxi_postalcode' value='"+postalCode+"' />"+
+           "</filter>"+
+           "<link-entity name='oxi_province' from='oxi_provinceid' to='oxi_provinceid' visible='false' link-type='outer' alias='a_9b36408ffe87eb11a812000d3ab4a527'>"+
+             "<attribute name='oxi_code' />"+
+           "</link-entity>"+
+        "</entity>"+
+       "</fetch>";
+
+       Xrm.WebApi.retrieveMultipleRecords("oxi_locality", "?fetchXml=" + fetchXML).then(
+        function success(result) {
+          if (result.entities.length > 0) {
+            var locality = result.entities[0];
+            CRMCommon.SetValue("oxi_locality", [{ id: locality.oxi_localityid, name: locality.oxi_name, entityType: "oxi_locality" }]);
+          }
+    });
+}
 }
 
 // Comprueba si es un DNI correcto.
